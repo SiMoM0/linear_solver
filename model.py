@@ -96,4 +96,67 @@ class Model():
         if optimal:
             print('The tableau has an optimal solution x = ', x)
         elif unbounded:
-            print('The tableau is unbounded')        
+            print('The tableau is unbounded')    
+
+    def dual_simplex_method(self, verbose=False):
+        tableau = self.tableau
+        beta = self.basic_var
+        #print the starting tableau
+        print('START TABLEAU:\n{}\n'.format(tableau))
+
+        #number of rows in the tableau
+        m = tableau.shape[0]
+        #number of columns in the tableau
+        n = tableau.shape[1]
+
+        #final cases
+        infeasible = False
+        optimal = False
+
+        while optimal == False and infeasible == False:
+            #get the vector of costs
+            b_vector = [tableau[b][0] for b in range(1, m)]
+            #verify if all the costs are >= 0, thus the tableau is in optimal form
+            if all(b >= 0 for b in b_vector):
+                optimal = True
+                break
+            else:
+                #index of basic variable that will leave the basis
+                t = 1
+                #find the first negative variable with b < 0
+                for i in range(1, m):
+                    if i != 0 and tableau[i][0] < 0:
+                        t = i
+                        break
+                if all(tableau[t][i] >= 0 for i in range(1, n)):
+                    infeasible = True
+                    break
+                else:
+                    #choose the variable that will enter the basis
+                    min = 100000
+                    h = 1
+                    for i in range(1, n):
+                        if tableau[t][i] < 0 and tableau[0][i] / abs(tableau[t][i]) < min:
+                            min = tableau[0][i] / abs(tableau[t][i])
+                            h = i
+                    if verbose:
+                        print('Pivot operation on the cell: {}\n'.format((t, h)))
+
+                    #pivot operation
+                    pivot_operation(tableau, t, h)
+
+                    #update the vector beta, containing the indices of the basis variables
+                    beta[t-1] = h
+
+            #Print the intermediate tableau
+            if verbose:
+                print('TABLEAU:\n{}\n'.format(tableau))
+
+        #solution
+        x = [0]*(n - 1)
+        for i, b in enumerate(beta):
+            x[b-1] = tableau[i+1][0]
+        if optimal:
+            print('The tableau has an optimal solution x = ', x)
+        elif infeasible:
+            print('The tableau is infeasible') 
