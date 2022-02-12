@@ -9,9 +9,9 @@ The code in this repository can perform the following actions:
 * Gomory's cut for integer linear problem (ILP)
 
 # How to use
-Starting from a linear programming problem (LP) like:
+1. Starting from a linear programming problem (LP) like:
 
-Convert the problem into the correspondent tableau as the following, making sure it contains the initial basis.
+2. Convert the problem into the correspondent tableau as the following, making sure it contains the initial basis.
 
   |    |    | x1 | x2 | x3 | x4 |
   | -- | -- | -- | -- | -- | -- |
@@ -19,14 +19,14 @@ Convert the problem into the correspondent tableau as the following, making sure
   | x3 | 24 |  6 |  4 |  1 |  0 |
   | x4 |  6 |  3 | -2 |  0 |  1 |
 
-Import the numpy package and the **Model** object:
+3. Import the numpy package and the **Model** object:
 
 ```python
 import numpy as np
 from model import Model
 ```
 
-Create a numpy array for the tableau and pass it into the **Model** object.
+4. Create a numpy array for the tableau and pass it into the **Model** object.
 
 ```python
 tableau = np.array([[0., -1., -1., 0., 0.],
@@ -36,13 +36,13 @@ basic_var = np.array([1, 2])
 model = Model(tableau, basic_var)
 ```
 
-Use the **primal_simplex_method()** to solve the problem by the primal simplex method. Otherwise the **dual_simplex_method()** for the dual simplex method. To visualize the intermediate tableau and other useful information set the parameter *verbose* to *True*.
+5. Use the **primal_simplex_method()** to solve the problem by the primal simplex method. Otherwise the **dual_simplex_method()** for the dual simplex method. To visualize the intermediate tableau and other useful information set the parameter *verbose* to *True*.
 
 ```python
 model.primal_simplex_method(verbose=True)
 ```
 
-Then the resulting output will looks like, showing all the intermediate steps and informations about the pivot operations made:
+6. Then the resulting output will looks like, showing all the intermediate steps and informations about the pivot operations made:
 
 ```python
 START TABLEAU:        
