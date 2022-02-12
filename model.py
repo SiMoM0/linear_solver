@@ -20,17 +20,69 @@ def pivot_operation(tableau, t, h):
 
 class Model():
     """
-	Implement the linear programming problem in tableau form
-	Each object has two attributes:
-		-The tableau on which perform operations
-		-The list of initial basic variables
+	Implement the linear programming problem in tableau form.
+	
+    Parameters:
+        - tableau: a numpy array representing the tableau on which perform operations
+        - basic_var: a list of initial basic variables
 	"""
 
-    def __init__(self, tableau, basic_var):
+    solution = None
+    z = None
+
+    def __init__(self, tableau, basic_var, integer=False):
         self.tableau = tableau
         self.basic_var = basic_var
+        self.integer = integer
 
-    def primal_simplex_method(self, two_phase=False, verbose=False):
+    def gomory_cut(self, verbose=0):
+        '''
+        Apply gomory's cut on the first fractional basic variables and add a new basic variable into the tableau.
+        '''
+        tableau = self.tableau
+        beta = self.basic_var
+
+        #apply gomory cut on the first fractional variable (fract is the index)
+        fract = 0
+        for i in range(1, m):
+            if tableau[i][0] != int(tableau[i][0]):
+                fract = i
+                break
+        #print the tableau with the gomory cut
+        if verbose:
+            print('TABLEAU WITH GOMORY CUT ON ROW=', fract)
+        #add the new row
+        tableau = np.vstack((tableau, np.array([0.]*n)))
+        #add the new column
+        tableau = np.hstack((tableau, np.zeros((m+1, 1), dtype=float)))
+        tableau[m][n] = 1.
+        
+        #update the order of the tableau and the vector beta
+        m = tableau.shape[0]
+        n = tableau.shape[1]
+        beta.append(n-1)
+        #update the value in the new row added
+        for i in range(n-1):
+            if tableau[fract][i] >= 0:
+                tableau[m-1][i] = -(tableau[fract][i] - int(tableau[fract][i]))
+            else:
+                tableau[m-1][i] = -(tableau[fract][i] - int(tableau[fract][i]-1))
+        if verbose:
+            print(tableau)
+        #update the cost vector
+        costs = [tableau[0][c] for c in range(1, n)]
+
+        return tableau, beta
+
+    def primal_simplex_method(self, two_phase=False, verbose=0):
+        '''
+        Solve the model using the primal simplex method in tableau form.
+        Parameters:
+            - verbose: integer value to obtain the followig informations
+                - 0 print the solution
+                - 1 print the intermediate tableau
+                - 2 show the pivot operations made
+        '''
         tableau = self.tableau
         beta = self.basic_var
         #print the starting tableau
@@ -73,7 +125,9 @@ class Model():
                         if tableau[i][h] > 0 and tableau[i][0] / tableau[i][h] < min:
                             min = tableau[i][0] / tableau[i][h]
                             t = i
-                    #print('Pivot operation on the cell: {}\n'.format((t, h)))
+
+                    if verbose == 2:
+                        print('Pivot operation on element {} in the cell: {}\n'.format(tableau[t][h], (t, h)))
 
                     #pivot operation
                     pivot_operation(tableau, t, h)
@@ -89,16 +143,27 @@ class Model():
         x = [0]*(n - 1)
         for i, b in enumerate(beta):
             x[b-1] = tableau[i+1][0]
+        self.solution = x
+        self.z = -tableau[0][0]
 
         if two_phase:
             return tableau, beta
 
-        if optimal:
-            print('The tableau has an optimal solution x = ', x)
-        elif unbounded:
-            print('The tableau is unbounded')    
+        if verbose >= 0:
+            if optimal:
+                print('The tableau has an optimal solution x = ', x)
+            elif unbounded:
+                print('The tableau is unbounded')    
 
-    def dual_simplex_method(self, verbose=False):
+    def dual_simplex_method(self, verbose=0):
+        '''
+        Solve the model using the dual simplex method in tableau form.
+        Parameters:
+            - verbose: integer value to obtain the followig informations
+                - 0 print the solution
+                - 1 print the intermediate tableau
+                - 2 show the pivot operations made
+        '''
         tableau = self.tableau
         beta = self.basic_var
         #print the starting tableau
@@ -139,7 +204,7 @@ class Model():
                         if tableau[t][i] < 0 and tableau[0][i] / abs(tableau[t][i]) < min:
                             min = tableau[0][i] / abs(tableau[t][i])
                             h = i
-                    if verbose:
+                    if verbose == 2:
                         print('Pivot operation on the cell: {}\n'.format((t, h)))
 
                     #pivot operation
@@ -156,7 +221,36 @@ class Model():
         x = [0]*(n - 1)
         for i, b in enumerate(beta):
             x[b-1] = tableau[i+1][0]
-        if optimal:
-            print('The tableau has an optimal solution x = ', x)
-        elif infeasible:
-            print('The tableau is infeasible') 
+        self.solution = x
+        self.z = -tableau[0][0]
+
+        if verbose >= 0:
+            if optimal:
+                print('The tableau has an optimal solution x = ', x)
+            elif infeasible:
+                print('The tableau is infeasible')
+
+    def solve(self, verbose=False):
+        '''
+        Solve the model.
+        This function apply whatever method (simplex, gomory cut, ...) is necessary in order to solve the model.
+        '''
+
+#create a model object from external source like a txt file
+def read_tableau(file_name):
+        tableau = []
+        #try to read the file
+        f = open(file_name, 'r')
+        #create tableau
+        for line in f:
+            row = line.split(' ')
+            row = [int(x) for x in row]
+            tableau.append(row)
+        #close file
+        f.close()
+
+        #assign the created tableau to the object model
+        tableau = np.array(tableau, dtype='float')
+        basic_var = [0, 0]
+
+        return Model(tableau=tableau, basic_var=basic_var)

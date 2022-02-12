@@ -16,4 +16,4 @@ basic_var = np.array([1, 2])
 
 model = Model(tableau, basic_var)
 
-model.primal_simplex_method(verbose=True)
+model.primal_simplex_method(verbose=2)

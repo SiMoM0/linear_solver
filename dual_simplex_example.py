@@ -9,9 +9,9 @@ import numpy as np
 from model import Model
 
 #DUAL SIMPLEX METHOD TEST
-tableau = np.array([[0., 1., 1., 0., 0.],
-                    [-4., 6., 4., 1., 0.],
-                    [-6., 3., -2., 0., 1.]])
+tableau = np.array([[0., 3., 2., 0., 0.],
+                    [-2., 8., -3., 1., 0.],
+                    [-6., 4., -2., 0., 1.]])
 basic_var = np.array([1, 2])
 
 model = Model(tableau, basic_var)
