@@ -1,23 +1,6 @@
 #package required
 import numpy as np
 
-#parameters: tableau, index t of the row, index h of the column
-def pivot_operation(tableau, t, h):
-    #shape of the tableau
-    m = tableau.shape[0]
-    n = tableau.shape[1]
-    pivot = tableau[t][h]
-    #divide the pivot row by the pivot element
-    for i in range(n):
-        tableau[t][i] /= pivot
-    #update all the other rows
-    save = pivot
-    for i in range(m):
-        if i != t and tableau[i][h] != 0:
-            save = tableau[i][h]
-            for j in range(n):
-                tableau[i][j] -= save*tableau[t][j]
-
 class Model():
     """
 	Implement the linear programming problem in tableau form.
@@ -25,15 +8,55 @@ class Model():
     Parameters:
         - tableau: a numpy array representing the tableau on which perform operations
         - basic_var: a list of initial basic variables
+        - integer: a boolean value indicating if the solution has to be integer
+
+    Attributes:
+        - start_tableau: the initial tableau passed as input
+        - tableau: the current tableau
+        - basic_var: a numpy array containing indexes of the current basic variables
+        - integer: a boolean value indicating if the solution has to be integer
+        - solution: an array representing the final solution if exists
+        - z: the optimal value if exists
 	"""
 
-    solution = None
-    z = None
-
     def __init__(self, tableau, basic_var, integer=False):
+        self.start_tableau = tableau
         self.tableau = tableau
         self.basic_var = basic_var
         self.integer = integer
+        self.solution = []
+        self.z = 0
+        self.unbounded = False
+        self.infeasible = False
+
+    def print_solution(self):
+        if self.solution != None:
+            print('The tableau has an optimal solution x = {}\nand the optimal value is z = {}'.format(self.solution, self.z))
+        elif self.unbounded:
+            print('The tableau is unbounded')
+        elif self.infeasible:
+            print('The tableau is infeasible')
+
+    #parameters: tableau, index t of the row, index h of the column
+    def pivot_operation(self, t, h):
+        '''
+        Performs the pivot operations of the cell represented by the input values for row t and column h
+        '''
+        tableau = self.tableau
+        #shape of the tableau
+        m = tableau.shape[0]
+        n = tableau.shape[1]
+        pivot = tableau[t][h]
+        #divide the pivot row by the pivot element
+        for i in range(n):
+            tableau[t][i] /= pivot
+        #update all the other rows
+        save = pivot
+        for i in range(m):
+            if i != t and tableau[i][h] != 0:
+                save = tableau[i][h]
+                for j in range(n):
+                    tableau[i][j] -= save*tableau[t][j]
 
     def gomory_cut(self, verbose=0):
         '''
@@ -79,14 +102,17 @@ class Model():
         Solve the model using the primal simplex method in tableau form.
         Parameters:
             - verbose: integer value to obtain the followig informations
-                - 0 print the solution
                 - 1 print the intermediate tableau
                 - 2 show the pivot operations made
+        Returns:
+            - final tableau
+            - 
         '''
         tableau = self.tableau
         beta = self.basic_var
         #print the starting tableau
-        print('START TABLEAU:\n{}\n'.format(tableau))
+        if verbose:
+            print('START TABLEAU:\n{}\n'.format(tableau))
 
         #number of rows in the tableau
         m = tableau.shape[0]
@@ -130,7 +156,7 @@ class Model():
                         print('Pivot operation on element {} in the cell: {}\n'.format(tableau[t][h], (t, h)))
 
                     #pivot operation
-                    pivot_operation(tableau, t, h)
+                    self.pivot_operation(t, h)
 
                     #update the vector beta, containing the indices of the basis variables
                     beta[t-1] = h
@@ -139,35 +165,34 @@ class Model():
             if verbose:
                 print('TABLEAU:\n{}\n'.format(tableau))
 
-        #solution
-        x = [0]*(n - 1)
-        for i, b in enumerate(beta):
-            x[b-1] = tableau[i+1][0]
-        self.solution = x
-        self.z = -tableau[0][0]
-
         if two_phase:
             return tableau, beta
 
-        if verbose >= 0:
-            if optimal:
-                print('The tableau has an optimal solution x = ', x)
-            elif unbounded:
-                print('The tableau is unbounded')    
+        if optimal:
+            #solution
+            x = [0]*(n - 1)
+            for i, b in enumerate(beta):
+                x[b-1] = tableau[i+1][0]
+            self.solution = x
+            self.z = -tableau[0][0]
+            #print('The tableau has an optimal solution x = ', x)
+        elif unbounded:
+            self.unbounded = True
+            #print('The tableau is unbounded')    
 
     def dual_simplex_method(self, verbose=0):
         '''
         Solve the model using the dual simplex method in tableau form.
         Parameters:
             - verbose: integer value to obtain the followig informations
-                - 0 print the solution
                 - 1 print the intermediate tableau
                 - 2 show the pivot operations made
         '''
         tableau = self.tableau
         beta = self.basic_var
         #print the starting tableau
-        print('START TABLEAU:\n{}\n'.format(tableau))
+        if verbose:
+            print('START TABLEAU:\n{}\n'.format(tableau))
 
         #number of rows in the tableau
         m = tableau.shape[0]
@@ -208,7 +233,7 @@ class Model():
                         print('Pivot operation on the cell: {}\n'.format((t, h)))
 
                     #pivot operation
-                    pivot_operation(tableau, t, h)
+                    self.pivot_operation(t, h)
 
                     #update the vector beta, containing the indices of the basis variables
                     beta[t-1] = h
@@ -217,18 +242,17 @@ class Model():
             if verbose:
                 print('TABLEAU:\n{}\n'.format(tableau))
 
-        #solution
-        x = [0]*(n - 1)
-        for i, b in enumerate(beta):
-            x[b-1] = tableau[i+1][0]
-        self.solution = x
-        self.z = -tableau[0][0]
-
-        if verbose >= 0:
-            if optimal:
-                print('The tableau has an optimal solution x = ', x)
-            elif infeasible:
-                print('The tableau is infeasible')
+        if optimal:
+            #solution
+            x = [0]*(n - 1)
+            for i, b in enumerate(beta):
+                x[b-1] = tableau[i+1][0]
+            self.solution = x
+            self.z = -tableau[0][0]
+            #print('The tableau has an optimal solution x = ', x)
+        elif infeasible:
+            self.infeasible = True
+            #print('The tableau is infeasible')
 
     def solve(self, verbose=False):
         '''
@@ -252,5 +276,5 @@ def read_tableau(file_name):
         #assign the created tableau to the object model
         tableau = np.array(tableau, dtype='float')
         basic_var = [0, 0]
-
+        #return the model
         return Model(tableau=tableau, basic_var=basic_var)
