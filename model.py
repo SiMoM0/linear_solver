@@ -26,6 +26,7 @@ class Model():
         self.integer = integer
         self.solution = []
         self.z = 0
+        self.optimal = False
         self.unbounded = False
         self.infeasible = False
 
@@ -65,6 +66,11 @@ class Model():
         tableau = self.tableau
         beta = self.basic_var
 
+        #number of rows in the tableau
+        m = tableau.shape[0]
+        #number of columns in the tableau
+        n = tableau.shape[1]
+
         #apply gomory cut on the first fractional variable (fract is the index)
         fract = 0
         for i in range(1, m):
@@ -92,10 +98,11 @@ class Model():
                 tableau[m-1][i] = -(tableau[fract][i] - int(tableau[fract][i]-1))
         if verbose:
             print(tableau)
-        #update the cost vector
-        costs = [tableau[0][c] for c in range(1, n)]
+            print('\n')
 
-        return tableau, beta
+        #reassign tableau and basic_var
+        self.tableau = tableau
+        self.basic_var = beta
 
     def primal_simplex_method(self, two_phase=False, verbose=0):
         '''
@@ -112,7 +119,7 @@ class Model():
         beta = self.basic_var
         #print the starting tableau
         if verbose:
-            print('START TABLEAU:\n{}\n'.format(tableau))
+            print('TABLEAU:\n{}\n'.format(tableau))
 
         #number of rows in the tableau
         m = tableau.shape[0]
@@ -173,6 +180,7 @@ class Model():
             x = [0]*(n - 1)
             for i, b in enumerate(beta):
                 x[b-1] = tableau[i+1][0]
+            self.optimal = True
             self.solution = x
             self.z = -tableau[0][0]
             #print('The tableau has an optimal solution x = ', x)
@@ -192,7 +200,7 @@ class Model():
         beta = self.basic_var
         #print the starting tableau
         if verbose:
-            print('START TABLEAU:\n{}\n'.format(tableau))
+            print('TABLEAU:\n{}\n'.format(tableau))
 
         #number of rows in the tableau
         m = tableau.shape[0]
@@ -247,6 +255,7 @@ class Model():
             x = [0]*(n - 1)
             for i, b in enumerate(beta):
                 x[b-1] = tableau[i+1][0]
+                self.optimal = True
             self.solution = x
             self.z = -tableau[0][0]
             #print('The tableau has an optimal solution x = ', x)
@@ -254,11 +263,30 @@ class Model():
             self.infeasible = True
             #print('The tableau is infeasible')
 
-    def solve(self, verbose=False):
+    def solve(self, verbose=0):
         '''
         Solve the model.
         This function apply whatever method (simplex, gomory cut, ...) is necessary in order to solve the model.
         '''
+
+        #start by using the primal simplex method
+        self.primal_simplex_method(verbose=verbose)
+
+        b = [self.tableau[i][0] for i in range(1, self.tableau.shape[0])]
+        int_solution = all(elem == int(elem) for elem in b)
+        #if it is not unbounded and there is at least an integer value start combining gomory cuts and dual simplex method
+        if not self.unbounded and self.integer:
+            #check if exists an integer value in the current solution
+            if not int_solution:
+                #set optimal to False since the solution it is not integer
+                self.optimal = False
+                #loop for finding integer solution if exists
+                while not int_solution and not self.infeasible:
+                    self.gomory_cut(verbose)
+                    self.dual_simplex_method(verbose=verbose)
+                    #set the new b
+                    b = [self.tableau[i][0] for i in range(1, self.tableau.shape[0])]
+                    int_solution = all(elem == int(elem) for elem in b)
 
 #create a model object from external source like a txt file
 def read_tableau(file_name):

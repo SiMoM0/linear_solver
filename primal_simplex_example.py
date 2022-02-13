@@ -15,5 +15,5 @@ tableau = np.array([[0., -1., -1., 0., 0.],
 basic_var = np.array([1, 2])
 
 model = Model(tableau, basic_var)
-
 model.primal_simplex_method(verbose=2)
+model.print_solution()
