@@ -269,6 +269,8 @@ class Model():
         This function apply whatever method (simplex, gomory cut, ...) is necessary in order to solve the model.
         '''
 
+        #TODO: manage the starting algorithm between primal and dual simplex
+
         #start by using the primal simplex method
         self.primal_simplex_method(verbose=verbose)
 

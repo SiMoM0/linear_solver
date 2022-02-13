@@ -5,10 +5,12 @@ This repository contains a simple implementation of a linear programming solver,
 The code in this repository can perform the following actions:
 * Primal Simplex method in tableau form
 * Dual Simplex method in tableau form
-* Two-Phase method (not full available yet)
+* Two-Phase method (to be implemented)
 * Gomory's cut for integer linear problem (ILP)
 
 # How to use
+
+**IMPORTANT:** [Numpy](www.numpy.org) package required in order to use the code.
 
 ### Standard solver from command line
 
@@ -28,7 +30,7 @@ The code in this repository can perform the following actions:
 
 </center>
 
-3. Create a txt file containing only the values in the tableau, for example *'tableau.txt'*:
+3. Create a txt file containing only the values in the tableau, for example *'tableau.txt'* in the same folder of the files *model.py* and *solver.py*:
 
 ```
 0 -1 -1 0 0
@@ -97,4 +99,4 @@ model.primal_simplex_method(verbose=2)
 model.dual_simplex_method(verbose=2)
 ```
 
-Further informations about all the functionalities available here in the Wiki.
+Further informations about all the functionalities soon available in a Wiki.
