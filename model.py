@@ -11,16 +11,17 @@ class Model():
         - integer: a boolean value indicating if the solution has to be integer
 
     Attributes:
-        - start_tableau: the initial tableau passed as input
         - tableau: the current tableau
         - basic_var: a numpy array containing indexes of the current basic variables
         - integer: a boolean value indicating if the solution has to be integer
         - solution: an array representing the final solution if exists
         - z: the optimal value if exists
+        - optimal: boolean value if the tableau is in optimal form
+        - unbounded: boolean value
+        - infeasible: boolean value
 	"""
 
     def __init__(self, tableau, basic_var, integer=False):
-        self.start_tableau = tableau
         self.tableau = tableau
         self.basic_var = basic_var
         self.integer = integer
@@ -32,7 +33,7 @@ class Model():
 
     def print_solution(self):
         if self.solution != None:
-            print('The tableau has an optimal solution x = {}\nand the optimal value is z = {}'.format(self.solution, self.z))
+            print('The tableau has an optimal solution x = {}\nThe optimal value is z = {}'.format(self.solution, self.z))
         elif self.unbounded:
             print('The tableau is unbounded')
         elif self.infeasible:
@@ -104,16 +105,13 @@ class Model():
         self.tableau = tableau
         self.basic_var = beta
 
-    def primal_simplex_method(self, two_phase=False, verbose=0):
+    def primal_simplex_method(self, verbose=0):
         '''
         Solve the model using the primal simplex method in tableau form.
         Parameters:
             - verbose: integer value to obtain the followig informations
                 - 1 print the intermediate tableau
                 - 2 show the pivot operations made
-        Returns:
-            - final tableau
-            - 
         '''
         tableau = self.tableau
         beta = self.basic_var
@@ -171,9 +169,6 @@ class Model():
             #Print the intermediate tableau
             if verbose:
                 print('TABLEAU:\n{}\n'.format(tableau))
-
-        if two_phase:
-            return tableau, beta
 
         if optimal:
             #solution
@@ -266,13 +261,32 @@ class Model():
     def solve(self, verbose=0):
         '''
         Solve the model.
-        This function apply whatever method (simplex, gomory cut, ...) is necessary in order to solve the model.
+        This function apply the following method necessary in order to solve the model:
+            - Primal Simplex method
+            - Dual Simplex method
+            - Gomory's Cut
         '''
 
-        #TODO: manage the starting algorithm between primal and dual simplex
+        #number of rows in the tableau
+        m = self.tableau.shape[0]
+        #number of columns in the tableau
+        n = self.tableau.shape[1]
 
-        #start by using the primal simplex method
-        self.primal_simplex_method(verbose=verbose)
+        #TODO: manage the starting algorithm between primal and dual simplex
+        b = [self.tableau[i][0] for i in range(1, self.tableau.shape[0])]
+        costs = [self.tableau[0][c] for c in range(1, n)]
+
+        #apply primal simplex method if all b are >= 0, otherwise the dual simplex
+        if all(elem >= 0 for elem in b):
+            if verbose:
+                print('\nPrimal simplex method applied\n')
+            self.primal_simplex_method(verbose=verbose)
+        elif all(elem >= 0 for elem in costs):
+            if verbose:
+                print('\nDual simplex method applied\n')
+            self.dual_simplex_method(verbose=verbose)
+        else:
+            raise Exception('Invalid tableau')
 
         b = [self.tableau[i][0] for i in range(1, self.tableau.shape[0])]
         int_solution = all(elem == int(elem) for elem in b)
@@ -291,7 +305,7 @@ class Model():
                     int_solution = all(elem == int(elem) for elem in b)
 
 #create a model object from external source like a txt file
-def read_tableau(file_name):
+def read_tableau(file_name, integer=False):
         tableau = []
         #try to read the file
         f = open(file_name, 'r')
@@ -307,4 +321,4 @@ def read_tableau(file_name):
         tableau = np.array(tableau, dtype='float')
         basic_var = [0, 0]
         #return the model
-        return Model(tableau=tableau, basic_var=basic_var)
+        return Model(tableau=tableau, basic_var=basic_var, integer=integer)
