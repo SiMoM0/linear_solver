@@ -1,6 +1,8 @@
 #example for an ILP problem using first primal simplex, then a combination of gomory cuts and dual simplex method
+#IMPORTANT: to run this file put it at the same level of the directory "solver"
+
 import numpy as np
-from model import Model
+from solver.model import Model
 
 tableau = np.array([[0, -4, -5, 0, 0, 0],
                     [8, 2, 2, 1, 0, 0],

@@ -26,7 +26,7 @@ The code in this repository can perform the following actions:
     | x3 | 24 |  6 |  4 |  1 |  0 |
     | x4 |  6 |  3 | -2 |  0 |  1 |
 
-3. Create a txt file containing only the values in the tableau, for example *'tableau.txt'* in the same folder of the files *model.py* and *solver.py*:
+3. Create a txt file containing only the values in the tableau, for example *'tableau.txt'* in the same folder of the directory *solver* and the file *solver.py*:
 
     ```
     0 -1 -1 0 0
@@ -68,11 +68,11 @@ The code in this repository can perform the following actions:
 
 ### Pyhton functions
 
-1. First import the numpy package and the **Model** object from the file *'model.py'*:
+1. First import the numpy package and the **Model** object from the file *'model.py'* in the directory *solver*:
 
     ```python
     import numpy as np
-    from model import Model
+    from solver.model import Model
     ```
 
 2. Using the above notation on how representing in tableau form an LP or ILP problem, create a numpy array for the tableau and pass it into the **Model** object. Moreover indicate the initial basic variables indexes in another numpy array (in the example x3 and x4 so [3, 4]).

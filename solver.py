@@ -4,7 +4,7 @@
 #where integer is 0 or 1 if the solution must be integer
 import sys
 import numpy as np
-from model import read_tableau
+from solver.model import read_tableau
 
 #get file name from command line
 file = sys.argv[1]

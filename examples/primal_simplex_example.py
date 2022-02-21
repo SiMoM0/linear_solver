@@ -1,4 +1,5 @@
 #Example for the primal simplex method in tableau form
+#IMPORTANT: to run this file put it at the same level of the directory "solver"
 #Tableau used:
 #           x1  x2  x3  x4
 #   z=   0  -1  -1   0   0
@@ -6,7 +7,7 @@
 #   x4   6   3  -2   0   1
 
 import numpy as np
-from model import Model
+from solver.model import Model
 
 #PRIMAL SIMPLEX METHOD TEST
 tableau = np.array([[0., -1., -1., 0., 0.],
