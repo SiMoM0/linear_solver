@@ -16,7 +16,7 @@ The code in this repository can perform the following actions:
 
 1. Starting from a linear programming problem (LP) like:
 
-![LP Problem](/Images/problem.jpg)
+    ![LP Problem](/Images/problem.jpg)
 
 2. Convert the problem into the correspondent tableau as the following, making sure it contains the initial basis:
 
@@ -66,7 +66,7 @@ The code in this repository can perform the following actions:
     The tableau has an optimal solution x =  [0, 6.0, 0, 18.0]
     ```
 
-### Pyhton function inline
+### Pyhton functions
 
 1. First import the numpy package and the **Model** object from the file *'model.py'*:
 
@@ -85,7 +85,7 @@ The code in this repository can perform the following actions:
     model = Model(tableau, basic_var)
     ```
 
-5. Use the **primal_simplex_method()** to solve the problem by the primal simplex method. Otherwise the **dual_simplex_method()** for the dual simplex method. To visualize the intermediate tableau and other useful information set the parameter *verbose* to the correspondent integer value.
+3. Use the **primal_simplex_method()** to solve the problem by the primal simplex method. Otherwise the **dual_simplex_method()** for the dual simplex method. To visualize the intermediate tableau and other useful information set the parameter *verbose* to the correspondent integer value.
 
     ```python
     model.primal_simplex_method(verbose=2)
@@ -93,6 +93,17 @@ The code in this repository can perform the following actions:
 
     ```python
     model.dual_simplex_method(verbose=2)
+    ```
+
+4. To print the solution use the function **print_solution()**, that will display all the informations as below:
+
+    ```python
+    model.print_solution()
+    ```
+
+    ```console
+    The tableau has an optimal solution x = [0, 6.0, 0, 18.0]
+    The optimal value is z = -6.0
     ```
 
 Further informations about all the functionalities soon available in a Wiki.
