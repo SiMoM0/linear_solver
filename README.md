@@ -106,4 +106,4 @@ The code in this repository can perform the following actions:
     The optimal value is z = -6.0
     ```
 
-Further informations about all the functionalities soon available in a Wiki.
+Further informations about all the functionalities available in the [Wiki](https://github.com/SiMoM0/linear_solver/wiki).
