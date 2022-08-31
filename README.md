@@ -10,7 +10,7 @@ The code in this repository can perform the following actions:
 
 # How to use
 
-**IMPORTANT:** [Numpy](www.numpy.org) package required in order to use the code.
+**IMPORTANT:** [Numpy](https://numpy.org/) package required in order to use the code.
 
 ### Standard solver from command line
 
