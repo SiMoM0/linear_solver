@@ -16,7 +16,17 @@ The code in this repository can perform the following actions:
 
 1. Starting from a linear programming problem (LP) like:
 
-    ![LP Problem](/Images/problem.jpg)
+    $$
+    \begin{cases}
+    min -x_1 -x_2 \\
+    \\
+    \quad \quad 6x_1 + 4x_2 + x_3 = 24 \\
+    \\
+    \quad \quad 3x_1 - 2x_2 + x_4 = 6 \\
+    \\
+    x_1, x_2, x_3, x_4 \geq 0
+    \end{cases}
+    $$
 
 2. Convert the problem into the correspondent tableau as the following, making sure it contains the initial basis:
 
