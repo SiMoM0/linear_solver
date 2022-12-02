@@ -6,6 +6,12 @@ import sys
 import numpy as np
 from solver.model import read_tableau
 
+#check command line argument and print usage
+if len(sys.argv) != 3:
+    print('\nUSAGE: solver.py <filename.txt> <integer>')
+    print('\nArguments:\n     <filename.txt>: path to the tableau file\n     <integer>: 1 if solution must be integer, 0 otherwise\n')
+    sys.exit()
+
 #get file name from command line
 file = sys.argv[1]
 integer = bool(sys.argv[2])

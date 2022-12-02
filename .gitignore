@@ -1,2 +1,5 @@
-#Ignore pychace
+#Ignore pycache
 *.pyc
+
+#Ignore images folder
+images/
